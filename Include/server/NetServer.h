@@ -2,10 +2,11 @@
 #define __NET_SERVER_H__
 
 #include "thread.h"
+#include "Session.h"
 
 struct sockaddr_in;
 
-namespace NetServer
+namespace NetFwk
 {
 
 /**
@@ -74,5 +75,5 @@ public:
 
 
 
-} //NetServer
+} //NetFwk
 #endif //__NET_SERVER_H__

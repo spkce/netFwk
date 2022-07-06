@@ -11,11 +11,9 @@
 #include "ctime.h"
 
 
-using namespace std;
-using namespace Terminal;
-using namespace NetServer;
+
 #if 0
-class CTermial : public Terminal::ITerminal
+class CTermial : public NetFwk::ITerminal
 {
 public:
 	/**
@@ -46,7 +44,7 @@ public:
 	* @param type 协议类型
 	* @return 成功：true；失败：false
 	**/
-	virtual bool connect(NetServer::ISession* session, int type);
+	virtual bool connect(NetFwk::ISession* session, int type);
 
 	/**
 	* @brief session 断开连接
@@ -54,7 +52,7 @@ public:
 	* @param type 协议类型
 	* @return 成功：true；失败：false
 	**/
-	virtual bool disconnet(NetServer::ISession* session, int type);
+	virtual bool disconnet(NetFwk::ISession* session, int type);
 	/**
 	* @brief 获取版本信息
 	* @param ver 版本信息
@@ -83,7 +81,7 @@ public:
 	* @param buf 消息内容
 	* @param len 消息长度
 	**/
-	void sessionTask(NetServer::ISession* session, char* buf, int len);
+	void sessionTask(NetFwk::ISession* session, char* buf, int len);
 
 
 private:
@@ -91,9 +89,9 @@ private:
 #define MAX_SESSION 5
 	const int m_maxSession;
 	const int m_portMain;
-	NetServer::INetServer* m_pServ;
+	NetFwk::INetServer* m_pServ;
 	IProtocl* m_protocl;
-	NetServer::ISession* m_session;
+	NetFwk::ISession* m_session;
 
 };
 
@@ -101,7 +99,7 @@ private:
 * @brief 构造函数
 **/
 CTermial::CTermial()
-:ITerminal::ITerminal(ITerminal::emTerminalScree)
+:ITerminal(ITerminal::emTerminalScree)
 ,m_maxSession(MAX_SESSION)
 ,m_portMain(PORT_MAIN)
 ,m_pServ(NULL)

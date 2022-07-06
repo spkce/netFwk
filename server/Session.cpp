@@ -11,7 +11,7 @@
 #include "Log.h"
 #include "MsgQueue.h"
 
-namespace NetServer
+namespace NetFwk
 {
 
 /**

@@ -3,17 +3,11 @@
 
 #include <string>
 
-namespace NetServer {
-	class ISession;
-}
-
-namespace Terminal {
-	class ITerminal;
-}
-
-namespace Screen
+namespace NetFwk
 {
 
+class ISession;
+class ITerminal;
 /**
 * @brief 协议接口类
 **/
@@ -43,7 +37,7 @@ public:
 	* @param termial 终端
 	* @return 协议接口
 	**/
-	static IProtocl * createInstance(protocl_t type, Terminal::ITerminal* termial);
+	static IProtocl * createInstance(protocl_t type, ITerminal* termial);
 	/**
 	* @brief 取消协议实例
 	* @param protocl 议接指针
@@ -57,7 +51,7 @@ public:
 	* @param len 接收到的内容长度
 	* @return 成功/失败
 	**/
-	virtual bool probe(NetServer::ISession* session, char* buf, int len) = 0;
+	virtual bool probe(ISession* session, char* buf, int len) = 0;
 
 	/**
 	* @brief 协议解析函数,具体协议类必须实现
@@ -66,7 +60,7 @@ public:
 	* @param len 接收到的内容长度
 	* @return 成功/失败
 	**/
-	virtual bool parse(NetServer::ISession* session, char* buf, int len) = 0;
+	virtual bool parse(ISession* session, char* buf, int len) = 0;
 	/**
 	* @brief 封装消息,具体协议类必须实现
 	* @param msgID 消息ID
@@ -74,7 +68,7 @@ public:
 	* @param len 接收到的内容长度
 	* @return 成功/失败
 	**/
-	virtual bool notify(NetServer::ISession* session, char* buf, int len) = 0;
+	virtual bool notify(ISession* session, char* buf, int len) = 0;
 	/**
 	* @brief 获取版本信息
 	* @param ver 版本信息
@@ -89,6 +83,6 @@ protected:
 
 
 
-} //Screen
+} //NetFwk
 
 #endif //__I_PROTOCL_H__

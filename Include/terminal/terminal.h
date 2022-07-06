@@ -3,11 +3,10 @@
 
 #include <string>
 
-namespace NetServer {
-	class ISession;
-}
-namespace Terminal
+namespace NetFwk
 {
+
+class ISession;
 
 class ITerminal
 {
@@ -34,9 +33,9 @@ public:
 
 	virtual int getState() = 0;
 
-	virtual bool connect(NetServer::ISession* session, int type) = 0;
+	virtual bool connect(ISession* session, int type) = 0;
 
-	virtual bool disconnet(NetServer::ISession* session, int type) = 0;
+	virtual bool disconnet(ISession* session, int type) = 0;
 
 	virtual bool getVersion(std::string & ver) = 0;
 

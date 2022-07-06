@@ -9,7 +9,7 @@
 #include "Log.h"
 
 
-namespace NetServer
+namespace NetFwk
 {
 
 class CTcpServer : public INetServer

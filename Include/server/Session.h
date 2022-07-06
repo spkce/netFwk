@@ -5,7 +5,7 @@
 #include "timer.h"
 #include <vector>
 
-namespace NetServer
+namespace NetFwk
 {
 
 /**
@@ -179,5 +179,5 @@ private:
 
 
 
-} //NetServer
+} //NetFwk
 #endif //__SESSION_H__
