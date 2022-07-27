@@ -69,6 +69,8 @@ public:
 	* @return 是/否
 	**/
 	virtual bool isRun() = 0;
+
+	virtual bool registerTerminal(ITerminal * pTerminal) = 0;
 };
 
 

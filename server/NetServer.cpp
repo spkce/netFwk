@@ -15,6 +15,12 @@ namespace NetFwk
 class CTcpServer : public INetServer
 {
 	friend class INetServer;
+
+	struct tagTerminalNode
+	{
+		ITerminal * pTerminal;
+	}TerminalNode;
+	
 private:
 	/**
 	* @brief CTcpServer构造函数，权限设定private，禁止外部实例，禁止继承
@@ -73,6 +79,9 @@ private:
 	int m_sockfd; //套接字句柄
 	int m_port;	//服务器端口号
 	
+	Infra::CMutex m_mutex;
+	std::vector<TerminalNode> m_vecTerminal;
+
 	static Infra::CMutex sm_mutex; //静态成员 互斥锁，用于保护sm_mapServer
 	static std::map<unsigned int, CTcpServer*> sm_mapServer; //静态成员sm_mapServer 管理所有CTcpServer服务器实例
 };
