@@ -159,7 +159,7 @@ bool CTermial::connect(ISession* session, int type)
 	//
 	if (session == NULL)
 	{
-		Error("NetTerminal", "input session null !!!\n");
+		Infra::Error("netFwk", "input session null !!!\n");
 		return false;
 	}
 
@@ -215,7 +215,7 @@ bool CTermial::serverTask(int sockfd, struct sockaddr_in* addr)
 {
 	if (CSessionManager::instance()->getState(m_session) == ISession::emStateLogin)
 	{
-		Warning("NetTerminal", "Gps Session was registered !\n");
+		Infra::Warning("netFwk", "Gps Session was registered !\n");
 		return false;
 	}
 

@@ -70,7 +70,6 @@ public:
 	**/
 	virtual bool isRun() = 0;
 
-	virtual bool registerTerminal(ITerminal * pTerminal) = 0;
 };
 
 

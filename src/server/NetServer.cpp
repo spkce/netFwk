@@ -15,12 +15,6 @@ namespace NetFwk
 class CTcpServer : public INetServer
 {
 	friend class INetServer;
-
-	struct tagTerminalNode
-	{
-		ITerminal * pTerminal;
-	}TerminalNode;
-	
 private:
 	/**
 	* @brief CTcpServer构造函数，权限设定private，禁止外部实例，禁止继承
@@ -80,7 +74,6 @@ private:
 	int m_port;	//服务器端口号
 	
 	Infra::CMutex m_mutex;
-	std::vector<TerminalNode> m_vecTerminal;
 
 	static Infra::CMutex sm_mutex; //静态成员 互斥锁，用于保护sm_mapServer
 	static std::map<unsigned int, CTcpServer*> sm_mapServer; //静态成员sm_mapServer 管理所有CTcpServer服务器实例
@@ -175,14 +168,14 @@ bool CTcpServer::start(unsigned int maxlisten)
 {
 	if (m_sockfd >= 0)
 	{
-		Error("NetTerminal", "socket is Already open\n");
+		Infra::Error("netFwk", "socket is Already open\n");
 		return false;
 	}
 
 	m_sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (m_sockfd < 0)
 	{
-		Error("NetTerminal", "open socket fail\n");
+		Infra::Error("netFwk", "open socket fail\n");
 		return false;
 	}
 	struct sockaddr_in servAddr;
@@ -192,7 +185,7 @@ bool CTcpServer::start(unsigned int maxlisten)
 	servAddr.sin_port = htons(m_port);
 	if (bind(m_sockfd, (struct sockaddr *)&servAddr, sizeof(servAddr)) < 0)
 	{
-		Error("NetTerminal", "socket bind port:%d fail\n", m_port);
+		Infra::Error("netFwk", "socket bind port:%d fail\n", m_port);
 		return false;
 	}
 
@@ -201,11 +194,11 @@ bool CTcpServer::start(unsigned int maxlisten)
 
 	if(listen(m_sockfd, maxlisten) < 0)
 	{
-		Error("NetTerminal", "socket listen port: %d fail\n", m_port);
+		Infra::Error("netFwk", "socket listen port: %d fail\n", m_port);
 		return false;
 	}
 	m_pThread->run();
-	Debug("NetTerminal", "tcp server: %d is ready\n", m_port);
+	Infra::Debug("netFwk", "tcp server: %d is ready\n", m_port);
 	return true;
 }
 
@@ -265,7 +258,7 @@ void CTcpServer::server_task(void* arg)
 	{
 		return;
 	}
-	Debug("NetTerminal", "port:%d connect:%s:%d\n", m_port, (char*)inet_ntoa(cliaddr.sin_addr), ntohs(cliaddr.sin_port));
+	Infra::Debug("netFwk", "port:%d connect:%s:%d\n", m_port, (char*)inet_ntoa(cliaddr.sin_addr), ntohs(cliaddr.sin_port));
 	if (m_proc.isEmpty() || !m_proc(sock, &cliaddr))
 	{
 		close(sock);

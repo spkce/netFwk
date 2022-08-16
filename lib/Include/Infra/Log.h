@@ -4,6 +4,9 @@
 #include <map>
 #include "thread.h"
 
+namespace Infra
+{
+
 void print_backtrace();
 
 /*
@@ -83,12 +86,14 @@ public:
 		type_modVer
 	};
 public:
-	CLog(int logType, std::string name, std::string ver);
+	CLog(std::string name, std::string ver, int type = type_onlyLog);
 	~CLog();
-	int setLogLevel(int lv);
-	int setLogType(int type);
-	int getLogLevel();
-	int getLogType();
+	int setLevel(int lv);
+	int setType(int type);
+	void setColor(bool isOn);
+	int getLevel() const;
+	int getType() const;
+	bool isColorOn() const;
 	std::string getName();
 	std::string getVer();
 
@@ -109,10 +114,11 @@ public:
 	#define warning(fmt, ...) _warning(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
 	#define error(fmt, ...) _error(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
 private:
-	int m_logType;
-	int m_printLogLevel;
+	int m_type;
+	int m_level;
 	std::string m_name;
 	std::string m_ver;
+	bool m_isColorOn;
 };
 
 class CLogManager
@@ -136,6 +142,6 @@ private:
 #define Warning(name, fmt, ...) CLogManager::instance()->getLog(name)->_warning(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
 #define Error(name, fmt, ...) CLogManager::instance()->getLog(name)->_error(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
 
-
+}//Infra
 
 #endif //__LOG_H__

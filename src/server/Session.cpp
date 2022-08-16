@@ -214,13 +214,13 @@ void CSession::set(int sockfd, struct sockaddr_in* addr, int timeout)
 
 	if (setsockopt(m_sockfd, SOL_SOCKET, SO_RCVTIMEO,(char*)&_timeout,sizeof(struct timeval)) == -1)
 	{
-		Error("NetTerminal","setsockopt error : %s\n", strerror(errno));
+		Infra::Error("netFwk","setsockopt error : %s\n", strerror(errno));
 		return;
 	}
 	
 	if (setsockopt(m_sockfd, SOL_SOCKET, SO_SNDTIMEO,(char*)&_timeout,sizeof(struct timeval)) == -1)
 	{
-		Error("NetTerminal","setsockopt error : %s\n", strerror(errno));
+		Infra::Error("netFwk","setsockopt error : %s\n", strerror(errno));
 		return;
 	}
 }
@@ -379,7 +379,7 @@ CSession* CSession::create()
 **/
 void CSession::destroy()
 {
-	Debug("NetTerminal", "Session:%s:%d destory\n", (char*)inet_ntoa(m_addr.sin_addr), ntohs(m_addr.sin_port));
+	Infra::Debug("netFwk", "Session:%s:%d destory\n", (char*)inet_ntoa(m_addr.sin_addr), ntohs(m_addr.sin_port));
 	delete this;
 }
 
@@ -403,7 +403,7 @@ int CSession::send(const char* buf, int len)
 
 	char* p = (char*)buf;
 
-	Debug("NetTerminal", "send len : %d -> %s:%d\n", len, (char*)inet_ntoa(m_addr.sin_addr), ntohs(m_addr.sin_port));
+	Infra::Debug("netFwk", "send len : %d -> %s:%d\n", len, (char*)inet_ntoa(m_addr.sin_addr), ntohs(m_addr.sin_port));
 
 	while (len > 0)
 	{
@@ -419,7 +419,7 @@ int CSession::send(const char* buf, int len)
 		}
 		else
 		{
-			Error("NetTerminal","send err : %s\n", strerror(errno));
+			Infra::Error("netFwk","send err : %s\n", strerror(errno));
 			if (m_timeout == -1)
 			{
 				//无超时的session，发送失败便登出
@@ -443,19 +443,19 @@ bool CSession::transmit(const char* buf, int len)
 {
 	if (buf == NULL || len <= 0)
 	{
-		Error("NetTerminal", "Input Param NULL\n");
+		Infra::Error("netFwk", "Input Param NULL\n");
 		return false;
 	}
 
 	if (m_state != emStateLogin)
 	{
-		Error("NetTerminal", "session must be login\n");
+		Infra::Error("netFwk", "session must be login\n");
 		return false;
 	}
 
 	if (len > MAX_DATA_BUF)
 	{
-		Error("NetTerminal", "too large date\n");
+		Infra::Error("netFwk", "too large date\n");
 		return false;
 	}
 	// todo use heap
@@ -479,7 +479,7 @@ void CSession::replyProc(void* arg)
 		return;
 	}
 
-	Debug("NetTerminal","recv:%s:%d len=%d\n", (char*)inet_ntoa(m_addr.sin_addr), ntohs(m_addr.sin_port), len);
+	Infra::Debug("netFwk","recv:%s:%d len=%d\n", (char*)inet_ntoa(m_addr.sin_addr), ntohs(m_addr.sin_port), len);
 	m_proc(this, m_pRecvbuf, len);
 	
 }
@@ -508,7 +508,7 @@ void CSession::timerProc(unsigned long long arg)
 {
 	if (isTimeout())
 	{
-		Debug("NetTerminal", "Session:%s:%d time out\n", (char*)inet_ntoa(m_addr.sin_addr), ntohs(m_addr.sin_port));
+		Infra::Debug("netFwk", "Session:%s:%d time out\n", (char*)inet_ntoa(m_addr.sin_addr), ntohs(m_addr.sin_port));
 		close();
 	}
 }
