@@ -1,7 +1,11 @@
+ROOT_DIR = $(shell pwd)
+DIR_LIB ?=  $(ROOT_DIR)/lib
+#DIR_INC ?
+CC ?= gcc
+CXX ?= g++
+AR ?= ar
 
-CC = gcc
-
-INC := -I Include -I Include/server -I Include/terminal -I Include/Protocol -I lib/Include/Infra
+INC := -I Include -I Include/server -I Include/terminal -I Include/Protocol -I lib/Infrastructure/Include
 
 CFLAGS = -L./lib -Wall  -lpthread -lrt -lstdc++ -std=c++11 -ldl -lInfra
 
@@ -14,6 +18,8 @@ SRC_DIR += \
 
 DIR_OBJ := ./obj
 TARGET := a.out
+
+.PHONY: all CHECKDIR submodules clean 
 
 all: CHECKDIR $(TARGET)
 
@@ -37,17 +43,19 @@ $(CPPOBJS): $(DIR_OBJ)/%.o: %.cpp
 	@mkdir -p $(dir $(@))
 	@$(CC) $(CFLAGS) -o $@ -c $< $(INC)
 
-$(TARGET): $(COBJS) $(CPPOBJS)
+$(TARGET): submodules $(COBJS) $(CPPOBJS)
 	@$(CC) $(COBJS) $(CPPOBJS) -g -o $@ $(INC) $(CFLAGS) 
 
-.PHONY: all CHECKDIR clean 
 
+submodules:
+	@make CC="$(CC)" CXX="$(CXX)" AR="$(AR)" DIR_LIB="$(DIR_LIB)" -C library/Infrastructure
 
 CHECKDIR:
 	@mkdir -p $(DIR_OBJ)
 	
 
 clean:
+	@make clean CC="$(CC)" CXX="$(CXX)" AR="$(AR)" DIR_LIB="$(DIR_LIB)" -C library/Infrastructure
 	@rm -rf ${DIR_OBJ}
 ifeq ($(TARGET), $(wildcard $(TARGET)))
 	@rm $(TARGET)
