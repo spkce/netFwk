@@ -5,7 +5,7 @@ CC ?= gcc
 CXX ?= g++
 AR ?= ar
 
-INC := -I Include -I Include/server -I Include/terminal -I Include/Protocol -I lib/Infrastructure/Include
+INC := -I Include -I Include/server -I Include/terminal -I Include/Protocol -I library/Infra/Include
 
 CFLAGS = -L./lib -Wall  -lpthread -lrt -lstdc++ -std=c++11 -ldl -lInfra
 
@@ -48,14 +48,14 @@ $(TARGET): submodules $(COBJS) $(CPPOBJS)
 
 
 submodules:
-	@make CC="$(CC)" CXX="$(CXX)" AR="$(AR)" DIR_LIB="$(DIR_LIB)" -C library/Infrastructure
+	@make CC="$(CC)" CXX="$(CXX)" AR="$(AR)" DIR_LIB="$(DIR_LIB)" -C library/Infra
 
 CHECKDIR:
 	@mkdir -p $(DIR_OBJ)
 	
 
 clean:
-	@make clean CC="$(CC)" CXX="$(CXX)" AR="$(AR)" DIR_LIB="$(DIR_LIB)" -C library/Infrastructure
+	@make clean CC="$(CC)" CXX="$(CXX)" AR="$(AR)" DIR_LIB="$(DIR_LIB)" -C library/Infra
 	@rm -rf ${DIR_OBJ}
 ifeq ($(TARGET), $(wildcard $(TARGET)))
 	@rm $(TARGET)
