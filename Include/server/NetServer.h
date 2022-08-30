@@ -77,11 +77,12 @@ public:
 class INetServerManager
 {
 private:
-	INetServerManager()
-	virtual ~INetServerManager()
+	INetServerManager();
+	virtual ~INetServerManager();
 
 public:
 	static INetServerManager* instance();
+};
 
 } //NetFwk
 #endif //__NET_SERVER_H__
