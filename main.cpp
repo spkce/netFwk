@@ -6,7 +6,7 @@
 #include <algorithm>
 #include "NetServer.h"
 #include "Session.h"
-#include "IProtocl.h"
+#include "Protocol.h"
 #include "Log.h"
 #include "ctime.h"
 

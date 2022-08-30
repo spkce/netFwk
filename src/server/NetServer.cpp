@@ -295,4 +295,21 @@ INetServer* INetServer::create(unsigned int port, Type_t type)
 	}
 	return NULL;
 }
-}//NetServer
+
+INetServerManager::INetServerManager()
+{
+
+}
+
+INetServerManager::~INetServerManager()
+{
+
+}
+
+INetServerManager* instance()
+{
+
+}
+
+} //NetFwk
+

@@ -2,6 +2,7 @@
 #define __NET_SERVER_H__
 
 #include "thread.h"
+#include "Protocol.h"
 #include "Session.h"
 
 struct sockaddr_in;
@@ -73,8 +74,14 @@ public:
 };
 
 
+class INetServerManager
+{
+private:
+	INetServerManager()
+	virtual ~INetServerManager()
 
-
+public:
+	static INetServerManager* instance();
 
 } //NetFwk
 #endif //__NET_SERVER_H__
