@@ -171,6 +171,7 @@ private:
 	**/
 	void timerProc(unsigned long long arg);
 
+	void exit(void* p);
 	Infra::CTimer m_timer;
 	Infra::CMutex m_mutex;
 	std::vector<ISession*> m_vecSession;

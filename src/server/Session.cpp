@@ -190,7 +190,7 @@ CSession::~CSession()
 
 	m_recvThread.detachProc(Infra::ThreadProc_t(&CSession::replyProc, this));
 	m_sendThread.detachProc(Infra::ThreadProc_t(&CSession::sendProc, this));
-
+	close();
 	delete[] m_pRecvbuf;
 }
 
@@ -532,6 +532,13 @@ CSessionManager::~CSessionManager()
 	{
 		m_timer.stop();
 	}
+
+	for(auto it = m_vecSession.begin(); it !=m_vecSession.end();)
+	{
+		ISession* p = *it;
+		p->destroy();
+		it = m_vecSession.erase(it);
+	}
 }
 
 /**
@@ -687,4 +694,8 @@ void CSessionManager::timerProc(unsigned long long arg)
 
 }
 
+void CSessionManager::exit(void* p)
+{
+
+}
 } //NetFwk
