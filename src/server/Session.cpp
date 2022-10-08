@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <algorithm>
- #include <string.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -14,192 +14,53 @@
 namespace NetFwk
 {
 
-/**
-* @brief 会话类
-**/
 class CSession : public ISession
 {
-	//friend class CSessionManager;
-private:
-	#define MAX_DATA_BUF 4096
- 	struct sendPacket
- 	{
-		int len;
-		char* buf[MAX_DATA_BUF];
- 	};
-protected: 
-	/**
-	* @brief 构造函数， 设定protected权限，不可实例，可继承
-	**/
+public:
 	CSession();
 
-	/**
-	* @brief 析构函数， 设定protected权限，不可实例，可继承
-	**/
+protected:
 	virtual ~CSession();
 
 public:
-	/**
-	* @brief 会话设定
-	* @param sockfd 套接字句柄
-	* @param addr 对端地址
-	* @param timeout 超时时间
-	**/
 	void set(int sockfd, struct sockaddr_in* addr, int timeout);
-
-	/**
-	* @brief 会话回调函数绑定
-	* @param proc 回调函数
-	* @return 成功：true；失败：false
-	**/
-	virtual bool bind(const ISession::SessionProc_t & proc);
-
-	/**
-	* @brief 会话回调函数取消绑定
-	* @return 成功：true；失败：false
-	**/
-	virtual bool unbind();
-
-	/**
-	* @brief 登录
-	* @return 成功：true；失败：false
-	**/
 	virtual bool login();
-
-	/**
-	* @brief 登出
-	* @return 成功：true；失败：false
-	**/
 	virtual bool logout();
-
-	/**
-	* @brief 保活
-	* @return 成功：true；失败：false
-	**/
 	virtual bool keepAlive();
-
-	/**
-	* @brief 是否超时
-	* @return 超时：true；未超时：false
-	**/
 	virtual bool isTimeout();
-
-	/**
-	* @brief 获取会话状态
-	* @return 获取会话状态
-	**/
+	virtual int getTimeout() const;
 	virtual state_t getState();
-
-	/**
-	* @brief 关闭会话
-	* @return 成功：true；失败：false
-	**/
 	virtual bool close();
-
-	/**
-	* @brief 创建会话
-	* @return 会话指针
-	**/
-	static CSession* create();
-
-	/**
-	* @brief 会话释放
-	**/
+	
 	virtual void destroy();
-
-	/**
-	* @brief 发送消息，同步
-	* @param buf 消息内容
-	* @param len 消息长度
-	* @return 发送的数据长度
-	**/
+	virtual int recv(char* buf, int len);
 	virtual int send(const char* buf, int len);
-
-	/**
-	* @brief 发送消息，异步
-	* @param buf 消息内容
-	* @param len 消息长度
-	* @return 获取会话状态
-	**/
-	virtual bool transmit(const char* buf, int len);
-
-	/**
-	* @brief 接收回调函数
-	* @param arg 无用参数
-	**/
-	void replyProc(void* arg);
-
-	/**
-	* @brief 发送回调函数，主要用于异步发送
-	* @param arg 无用参数
-	**/
-	void sendProc(void* arg);
-
-	/**
-	* @brief 定时器回调函数
-	* @param arg 系统运行时间 ms
-	**/
-	void timerProc(unsigned long long arg);
 
 private:
 
-#define RECV_LEN 1024
-	Infra::CMsgQueue m_queue;
-	Infra::CThread m_recvThread;
-	Infra::CThread m_sendThread;
 	struct sockaddr_in m_addr;
-	ISession::SessionProc_t m_proc;
 	Infra::CTimer m_timer;
-	const int m_RecvLen;
 
 	unsigned long long m_lastTime;
 	int m_timeout;
 	int m_sockfd;
 	state_t m_state;
-	char* m_pRecvbuf;
 };
 
-/**
-* @brief 构造函数， 设定protected权限，不可实例，可继承
-**/
 CSession::CSession()
-:m_queue(5, sizeof(struct sendPacket))
-,m_RecvLen(RECV_LEN)
-,m_lastTime(0)
+:m_lastTime(0)
 ,m_timeout(-1)
 ,m_sockfd(-1)
 ,m_state(emStateCreated)
 {
 	memset(&m_addr, 0, sizeof(struct sockaddr_in));
-	m_recvThread.attachProc(Infra::ThreadProc_t(&CSession::replyProc, this));
-	m_sendThread.attachProc(Infra::ThreadProc_t(&CSession::sendProc, this));
-	m_pRecvbuf = new char[m_RecvLen];
-
-	m_timer.setTimerAttr(Infra::CTimer::TimerProc_t(&CSession::timerProc, this), 3000);
 }
 
-/**
-* @brief 析构函数， 设定protected权限，不可实例，可继承
-**/
 CSession::~CSession()
 {
-	if (m_timer.isRun())
-	{
-		m_timer.stop();
-	}
-
-	m_recvThread.detachProc(Infra::ThreadProc_t(&CSession::replyProc, this));
-	m_sendThread.detachProc(Infra::ThreadProc_t(&CSession::sendProc, this));
 	close();
-	delete[] m_pRecvbuf;
 }
 
-/**
-* @brief 会话设定
-* @param sockfd 套接字句柄
-* @param addr 对端地址
-* @param timeout 超时时间
-**/
 void CSession::set(int sockfd, struct sockaddr_in* addr, int timeout)
 {
 	m_sockfd = sockfd;
@@ -225,61 +86,9 @@ void CSession::set(int sockfd, struct sockaddr_in* addr, int timeout)
 	}
 }
 
-/**
-* @brief 会话回调函数绑定
-* @param proc 回调函数
-* @return 成功：true；失败：false
-**/
-bool CSession::bind(const ISession::SessionProc_t & proc)
-{
-	if (!m_proc.isEmpty())
-	{
-		return false;
-	}
-	m_proc = proc;
-	m_recvThread.createTread();
-	m_recvThread.run();
-	m_sendThread.createTread();
-	m_sendThread.run();
-	m_state = emStateLogout;
-	m_lastTime = Infra::CTime::getSystemTimeSecond();
-	if (m_timeout > 0 && !m_timer.isRun())
-	{
-		//当超时时间大于0时才有必要启动定时器
-		m_timer.run();
-	}
-	return true;
-}
-
-/**
-* @brief 会话回调函数取消绑定
-* @return 成功：true；失败：false
-**/
-bool CSession::unbind()
-{
-	if (m_proc.isEmpty())
-	{
-		return false;
-	}
-	m_recvThread.stop(true);
-	m_sendThread.stop(true);
-	m_proc.unbind();
-	
-	if (m_timeout > 0 && m_timer.isRun())
-	{
-		m_timer.stop();
-	}
-	m_state = emStateClose;
-	return true;
-}
-
-/**
-* @brief 登录
-* @return 成功：true；失败：false
-**/
 bool CSession::login()
 {
-	if (m_state == emStateLogout)
+	if (m_state < emStateLogin)
 	{
 		m_lastTime = Infra::CTime::getSystemTimeSecond();
 		m_state = emStateLogin;
@@ -288,24 +97,17 @@ bool CSession::login()
 	return false;
 }
 
-/**
-* @brief 登出
-* @return 成功：true；失败：false
-**/
 bool CSession::logout()
 {
 	if (m_state == emStateLogin)
 	{
 		m_state = emStateLogout;
+		Infra::Debug("netFwk", "Session:%s:%d logout\n", (char*)inet_ntoa(m_addr.sin_addr), ntohs(m_addr.sin_port));
 		return true;
 	}
 	return false;
 }
 
-/**
-* @brief 保活
-* @return 成功：true；失败：false
-**/
 bool CSession::keepAlive()
 {
 	if (m_state == emStateLogin)
@@ -316,10 +118,6 @@ bool CSession::keepAlive()
 	return false;
 }
 
-/**
-* @brief 是否超时
-* @return 超时：true；未超时：false
-**/
 bool CSession::isTimeout()
 {
 	if (m_timeout >= 0 && (m_lastTime + m_timeout) <= Infra::CTime::getSystemTimeSecond())
@@ -330,19 +128,16 @@ bool CSession::isTimeout()
 	return false;
 }
 
-/**
-* @brief 获取会话状态
-* @return 获取会话状态
-**/
+int CSession::getTimeout() const
+{
+	return m_timeout;
+}
+
 ISession::state_t CSession::getState()
 {
 	return m_state;
 }
 
-/**
-* @brief 关闭会话
-* @return 成功：true；失败：false
-**/
 bool CSession::close()
 {
 	switch (m_state)
@@ -350,7 +145,6 @@ bool CSession::close()
 	case emStateLogin:
 		logout();
 	case emStateLogout:
-		unbind();
 	case emStateCreated:
 		if (m_sockfd >= 0)
 		{
@@ -365,30 +159,14 @@ bool CSession::close()
 	}
 }
 
-/**
-* @brief 创建会话
-* @return 会话指针
-**/
-CSession* CSession::create()
-{
-	return new CSession();
-}
 
-/**
-* @brief 会话释放
-**/
+
 void CSession::destroy()
 {
 	Infra::Debug("netFwk", "Session:%s:%d destory\n", (char*)inet_ntoa(m_addr.sin_addr), ntohs(m_addr.sin_port));
 	delete this;
 }
 
-/**
-* @brief 发送消息，同步
-* @param buf 消息内容
-* @param len 消息长度
-* @return 发送的数据长度
-**/
 int CSession::send(const char* buf, int len)
 {
 	if (m_sockfd < 0)
@@ -433,269 +211,25 @@ int CSession::send(const char* buf, int len)
 	return len;
 }
 
-/**
-* @brief 发送消息，异步
-* @param buf 消息内容
-* @param len 消息长度
-* @return 获取会话状态
-**/
-bool CSession::transmit(const char* buf, int len)
+int CSession::recv(char* buf, int len)
 {
 	if (buf == NULL || len <= 0)
 	{
-		Infra::Error("netFwk", "Input Param NULL\n");
-		return false;
+		return -1;
 	}
 
-	if (m_state != emStateLogin)
-	{
-		Infra::Error("netFwk", "session must be login\n");
-		return false;
-	}
+	int rlen = ::recv(m_sockfd, buf, len, 0);
 
-	if (len > MAX_DATA_BUF)
-	{
-		Infra::Error("netFwk", "too large date\n");
-		return false;
-	}
-	// todo use heap
-	struct sendPacket packet = {0};
-	packet.len = len;
-	memcpy(packet.buf, buf, len);
-	return m_queue.input((const char*)&packet, sizeof(struct sendPacket), 1);
+	Infra::Debug("netFwk","recv:%s:%d len=%d\n", (char*)inet_ntoa(m_addr.sin_addr), ntohs(m_addr.sin_port), rlen);
+
+	return rlen;
 }
 
-/**
-* @brief 接收回调函数
-* @param arg 无用参数
-**/
-void CSession::replyProc(void* arg)
+ISession* ISession::create(int sockfd, struct sockaddr_in* addr, int timeout)
 {
-	memset(m_pRecvbuf, 0, m_RecvLen);
-	int len = recv(m_sockfd, m_pRecvbuf, m_RecvLen, 0);
-
-	if (len <= 0 || m_proc.isEmpty())
-	{
-		return;
-	}
-
-	Infra::Debug("netFwk","recv:%s:%d len=%d\n", (char*)inet_ntoa(m_addr.sin_addr), ntohs(m_addr.sin_port), len);
-	m_proc(this, m_pRecvbuf, len);
-	
+	CSession* p = new CSession();
+	p->set(sockfd, addr, timeout);
+	return p;
 }
 
-/**
-* @brief 发送回调函数，主要用于异步发送
-* @param arg 无用参数
-**/
-void CSession::sendProc(void* arg)
-{
-	struct sendPacket packet = {0}; // todo use heap
-	if (m_queue.output((char *)&packet, sizeof(struct sendPacket), 300) > 0)
-	{
-		send((const char*)(packet.buf), packet.len);
-		return ;
-	}
-
-	Infra::CTime::delay_ms(300);
-}
-
-/**
-* @brief 定时器回调函数
-* @param arg 系统运行时间 ms
-**/
-void CSession::timerProc(unsigned long long arg)
-{
-	if (isTimeout())
-	{
-		Infra::Debug("netFwk", "Session:%s:%d time out\n", (char*)inet_ntoa(m_addr.sin_addr), ntohs(m_addr.sin_port));
-		close();
-	}
-}
-
-/**
-* @brief 构造函数， 设定private权限，外部不可实例，不可继承
-**/
-CSessionManager::CSessionManager()
-:m_timer("SessionManager")
-{
-	m_timer.setTimerAttr(Infra::CTimer::TimerProc_t(&CSessionManager::timerProc, this), 3000);
-	m_timer.run();
-}
-
-/**
-* @brief 析构函数， 设定private权限，外部不可实例，不可继承
-**/
-CSessionManager::~CSessionManager()
-{
-	if (m_timer.isRun())
-	{
-		m_timer.stop();
-	}
-
-	for(auto it = m_vecSession.begin(); it !=m_vecSession.end();)
-	{
-		ISession* p = *it;
-		p->destroy();
-		it = m_vecSession.erase(it);
-	}
-}
-
-/**
-* @brief 获取会话管理类实例
-**/
-CSessionManager* CSessionManager::instance()
-{
-	static CSessionManager* pInstance = NULL;
-	if (pInstance == NULL)
-	{
-		static Infra::CMutex sm_mutex;
-		Infra::CGuard<Infra::CMutex> guard(sm_mutex);
-		if (pInstance == NULL)
-		{
-			pInstance = new CSessionManager;
-		}
-	}
-	return pInstance;
-}
-
-/**
-* @brief 创建session
-* @param sockfd 套接字句柄
-* @param addr 对端地址
-* @param timeout 超时时间单位秒，默认值-1 不会超时
-* @return 会话基类指针
-**/
-ISession* CSessionManager::createSession(int sockfd, struct sockaddr_in* addr, int timeout)
-{
-	if (sockfd < 0 || addr == NULL)
-	{
-		return NULL;
-	}
-	CSession* pSession = CSession::create();
-	
-	pSession->set(sockfd, addr, timeout);
-	
-	registerSession(pSession);
-	return pSession;
-}
-
-/**
-* @brief 查询session是否注册中
-* @param session 指针
-* @return 是否注册
-**/
-bool CSessionManager::isSessionRegister(ISession* session)
-{
-	if (session == NULL)
-	{
-		return false;
-	}
-
-	Infra::CGuard<Infra::CMutex> guard(m_mutex);
-	std::vector<ISession*>::iterator iter = find(m_vecSession.begin(), m_vecSession.end(), session);
-
-	return iter == m_vecSession.end();
-}
-
-/**
-* @brief 关闭session
-* @param session 会话基类指针
-**/
-bool CSessionManager::cancelSession(ISession* session)
-{
-	if (session == NULL)
-	{
-		return false;
-	}
-
-	Infra::CGuard<Infra::CMutex> guard(m_mutex);
-
-	std::vector<ISession*>::iterator iter = find(m_vecSession.begin(), m_vecSession.end(), session);
-
-	if (iter != m_vecSession.end())
-	{
-		session->close();
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-/**
-* @brief 查询session状态
-* @param session 指针
-* @return 状态
-**/
-int CSessionManager::getState(ISession* session)
-{
-	if (session == NULL)
-	{
-		return ISession::emStateNone;
-	}
-
-	Infra::CGuard<Infra::CMutex> guard(m_mutex);
-
-	std::vector<ISession*>::iterator iter = find(m_vecSession.begin(), m_vecSession.end(), session);
-
-	if (iter != m_vecSession.end())
-	{
-		return session->getState();
-	}
-	else
-	{
-		return ISession::emStateNone;
-	}
-}
-
-/**
-* @brief 注册session
-* @param session 会话基类指针
-**/
-void CSessionManager::registerSession(ISession* session)
-{
-	if (session == NULL)
-	{
-		return ;
-	}
-
-	Infra::CGuard<Infra::CMutex> guard(m_mutex);
-
-	std::vector<ISession*>::iterator iter = find(m_vecSession.begin(), m_vecSession.end(), session);
-	if (iter == m_vecSession.end())
-	{
-		m_vecSession.push_back(session);
-	}
-}
-
-/**
-* @brief 定时器回调函数
-* @param arg 时间，系统运行时间毫秒
-**/
-void CSessionManager::timerProc(unsigned long long arg)
-{
-	Infra::CGuard<Infra::CMutex> guard(m_mutex);
-	std::vector<ISession*>::iterator it;
-	for (it = m_vecSession.begin(); it != m_vecSession.end();)
-	{
-		ISession* p = *it;
-		if (p->getState() == ISession::emStateClose)
-		{
-			it = m_vecSession.erase(it);
-			p->destroy(); 
-		}
-		else
-		{
-			it++;
-		}
-	}
-
-}
-
-void CSessionManager::exit(void* p)
-{
-
-}
 } //NetFwk

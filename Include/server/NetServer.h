@@ -2,7 +2,7 @@
 #define __NET_SERVER_H__
 
 #include "thread.h"
-#include "Protocol.h"
+#include "terminal.h"
 #include "Session.h"
 
 struct sockaddr_in;
@@ -30,15 +30,11 @@ public:
 		emTCPServer,
 		emUDPServer,
 	}Type_t;
+
 protected:
-	/**
-	* @brief INetServer构造函数，权限设定protected，禁止实例
-	**/
 	INetServer();
-	/**
-	* @brief INetServer析造函数，权限设定protected，禁止实例
-	**/
 	virtual ~INetServer();
+
 public:
 	/**
 	* @brief 服务器创建函数
@@ -47,6 +43,8 @@ public:
 	* @return 服务器接口
 	**/
 	static INetServer* create(unsigned int port, Type_t type);
+
+	//static INetServer* create(unsigned int port, IProtocol* p);
 	/**
 	* @brief 服务器开始运行
 	* @param maxlisten 最大连接
@@ -71,17 +69,6 @@ public:
 	**/
 	virtual bool isRun() = 0;
 
-};
-
-
-class INetServerManager
-{
-private:
-	INetServerManager();
-	virtual ~INetServerManager();
-
-public:
-	static INetServerManager* instance();
 };
 
 } //NetFwk
