@@ -43,6 +43,7 @@ public:
 	CTermial();
 	virtual ~CTermial();
 	virtual NetFwk::IProtocol* createProtocol(NetFwk::ISession* session, size_t recvLen);
+	void destroyProtocol(NetFwk::IProtocol* protocol);
 	virtual int getState();
 
 private:
@@ -70,6 +71,12 @@ CTermial::~CTermial()
 NetFwk::IProtocol* CTermial::createProtocol(NetFwk::ISession* session, size_t recvLen)
 {
 	return new CProtocol(session, recvLen);
+}
+
+void CTermial::destroyProtocol(NetFwk::IProtocol* protocol)
+{
+	CProtocol* p = dynamic_cast<CProtocol*>(protocol);
+	delete p;
 }
 
 int CTermial::getState()

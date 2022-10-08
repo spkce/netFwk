@@ -7,20 +7,18 @@ namespace NetFwk
 {
 
 ITerminal::ITerminal(int max)
-:m_vecProtocol(max)
+:m_listProtocol(max)
 ,m_pServer(nullptr)
 ,m_maxSession(max)
 ,m_port(0)
+,m_timeout(-1)
 {
 	
 }
 
 ITerminal::~ITerminal()
 {
-	m_pServer->stop();
-
-	//delete m_pServer();
-	//delete m_vecProtocol
+	stop();
 }
 
 bool ITerminal::init(unsigned int port, int timeout)
@@ -34,18 +32,37 @@ bool ITerminal::init(unsigned int port, int timeout)
 	m_pServer->attach(INetServer::ServerProc_t(&ITerminal::serverTask, this));
 	m_pServer->start(m_maxSession);
 
+	m_timeout = timeout;
+	return true;
+}
+
+bool ITerminal::stop()
+{
+	if (m_pServer->isRun())
+	{
+		m_pServer->stop();
+	}
+
+	//delete m_pServer();
+	for (auto it = m_listProtocol.begin(); it != m_listProtocol.end(); ++it)
+	{
+		IProtocol* p = *it;
+		destroyProtocol(p);
+	}
+
+	m_listProtocol.clear();
 	return true;
 }
 
 bool ITerminal::serverTask(int sockfd, struct sockaddr_in* addr)
 {
-	if (m_vecProtocol.size() < m_maxSession)
+	if (m_listProtocol.size() < m_maxSession)
 	{
 		Infra::Warning("netFwk", "the number of session reaches its maximun !\n");
 		return false;
 	}
 
-	ISession* pSession = ISession::create(sockfd, addr, 15);
+	ISession* pSession = ISession::create(sockfd, addr, m_timeout);
 	if (pSession == nullptr)
 	{
 		Infra::Warning("netFwk", "Session create fail!\n");
@@ -60,7 +77,7 @@ bool ITerminal::serverTask(int sockfd, struct sockaddr_in* addr)
 		return false;
 	}
 
-	m_vecProtocol.push_back(p);
+	m_listProtocol.push_back(p);
 	return true;
 }
 
@@ -68,7 +85,19 @@ void ITerminal::eventTask(IProtocol* p, int event)
 {
 	if (event == IProtocol::Logout)
 	{
-		//for m_vecProtocol
+		for (auto it = m_listProtocol.begin(); it != m_listProtocol.end();)
+		{
+			if (*it == p)
+			{
+				m_listProtocol.erase(it);
+				destroyProtocol(p);
+				break;
+			}
+			else
+			{
+				++it;
+			}
+		}
 	}
 }
 
