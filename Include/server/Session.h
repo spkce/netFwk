@@ -54,12 +54,6 @@ public:
 	* @return 成功：true；失败：false
 	**/
 	virtual bool keepAlive() = 0;
-	
-	/**
-	* @brief 是否超时
-	* @return 超时：true；未超时：false
-	**/
-	virtual bool isTimeout() = 0;
 
 	/**
 	* @brief 获取超时时间
@@ -71,7 +65,7 @@ public:
 	* @brief 获取会话状态
 	* @return 获取会话状态
 	**/
-	virtual state_t getState() = 0;
+	virtual state_t getState() const = 0;
 
 	/**
 	* @brief 关闭会话

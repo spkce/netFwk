@@ -11,40 +11,74 @@ namespace NetFwk
 
 class IProtocol
 {
+	friend class ITerminal;
 public:
 	enum
 	{
-		Reply,
-		NoReply,
+		OK,
 		Logout,
 	};
 
-	typedef Infra::CFunc<void, IProtocol*, int> EventProc_t;
 protected:
+	/**
+	* @param session 会话
+	* @param recvlen 接收缓冲区大小
+	**/
 	IProtocol(ISession* session, size_t recvlen);
 	virtual ~IProtocol();
 
 public:
-	virtual bool watchEvent(const EventProc_t& func);
-	virtual int parse(char* buf, int len) = 0;
+	/**
+	* @brief 开始
+	* @return 成功：true；失败：false
+	**/
+	virtual bool start();
+
+	/**
+	* @brief 回报解析函数，由子类实现
+	* @return 
+	**/
+	virtual int parse(const char* buf, int len) = 0;
+	
+	/**
+	* @brief 发送报文
+	* @param buf 发送内容
+	* @param len 发送内容长度
+	* @return 剩余未发送的长度
+	**/
 	virtual int send(const char* buf, int len);
 
 protected:
-	virtual void notify(int event);
+	/**
+	* @brief 登录
+	* @return 成功：true；失败：false
+	**/
+	virtual bool login();
+
+	/**
+	* @brief 登出
+	* @return 成功：true；失败：false
+	**/
+	virtual bool logout();
+	
+	/**
+	* @brief 保活
+	* @return 成功：true；失败：false
+	**/
+	virtual bool keepAlive();
 
 private:
+	bool isLogout() const;
 	void sessionTask(void* arg);
-	void timerProc(unsigned long long arg);
 
 protected:
 	Infra::CThread m_thread;
 	Infra::CTimer m_timer;
-	EventProc_t m_event;
 	ISession* m_session;
 	const size_t m_recvLen;
 	char* m_pBuffer;
-
 };
+
 
 } //NetFwk
 

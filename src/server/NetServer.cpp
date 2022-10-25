@@ -22,7 +22,7 @@ private:
 	static bool closeServer(unsigned int port);
 
 public:
-	virtual bool attach(INetServer::ServerProc_t proc);
+	virtual bool attach(const INetServer::ServerProc_t& proc);
 	virtual bool start(unsigned int maxlisten);
 	virtual bool stop();
 	virtual bool isRun();
@@ -90,7 +90,7 @@ bool CTcpServer::closeServer(unsigned int port)
 	return false;
 }
 
-bool CTcpServer::attach(INetServer::ServerProc_t proc)
+bool CTcpServer::attach(const INetServer::ServerProc_t & proc)
 {
 	if (!m_proc.isEmpty())
 	{

@@ -9,7 +9,6 @@
 #include "thread.h"
 #include "ctime.h"
 #include "Log.h"
-#include "MsgQueue.h"
 
 namespace NetFwk
 {
@@ -27,14 +26,16 @@ public:
 	virtual bool login();
 	virtual bool logout();
 	virtual bool keepAlive();
-	virtual bool isTimeout();
 	virtual int getTimeout() const;
-	virtual state_t getState();
+	virtual state_t getState() const;
 	virtual bool close();
 	
 	virtual void destroy();
 	virtual int recv(char* buf, int len);
 	virtual int send(const char* buf, int len);
+
+private:
+	void timerProc(unsigned long long arg);
 
 private:
 
@@ -72,6 +73,10 @@ void CSession::set(int sockfd, struct sockaddr_in* addr, int timeout)
 	{
 		_timeout.tv_sec = timeout;
 	}
+	else
+	{
+		m_state = emStateLogin;
+	}
 
 	if (setsockopt(m_sockfd, SOL_SOCKET, SO_RCVTIMEO,(char*)&_timeout,sizeof(struct timeval)) == -1)
 	{
@@ -84,6 +89,13 @@ void CSession::set(int sockfd, struct sockaddr_in* addr, int timeout)
 		Infra::Error("netFwk","setsockopt error : %s\n", strerror(errno));
 		return;
 	}
+
+	if (timeout > 0)
+	{
+		m_timer.setTimerAttr(Infra::CTimer::TimerProc_t(&CSession::timerProc, this), 3000);
+		m_timer.run();
+	}
+
 }
 
 bool CSession::login()
@@ -118,28 +130,23 @@ bool CSession::keepAlive()
 	return false;
 }
 
-bool CSession::isTimeout()
-{
-	if (m_timeout >= 0 && (m_lastTime + m_timeout) <= Infra::CTime::getSystemTimeSecond())
-	{
-		return true;
-	}
-
-	return false;
-}
-
 int CSession::getTimeout() const
 {
 	return m_timeout;
 }
 
-ISession::state_t CSession::getState()
+ISession::state_t CSession::getState() const
 {
 	return m_state;
 }
 
 bool CSession::close()
 {
+	if (m_timeout > 0 && m_timer.isRun())
+	{
+		m_timer.stop();
+	}
+
 	switch (m_state)
 	{
 	case emStateLogin:
@@ -158,8 +165,6 @@ bool CSession::close()
 		return false;
 	}
 }
-
-
 
 void CSession::destroy()
 {
@@ -219,10 +224,20 @@ int CSession::recv(char* buf, int len)
 	}
 
 	int rlen = ::recv(m_sockfd, buf, len, 0);
-
-	Infra::Debug("netFwk","recv:%s:%d len=%d\n", (char*)inet_ntoa(m_addr.sin_addr), ntohs(m_addr.sin_port), rlen);
+	if (rlen > 0)
+	{
+		Infra::Debug("netFwk","recv:%s:%d len=%d\n", (char*)inet_ntoa(m_addr.sin_addr), ntohs(m_addr.sin_port), rlen);
+	}
 
 	return rlen;
+}
+
+void CSession::timerProc(unsigned long long arg)
+{
+	if ((m_lastTime + m_timeout) <= Infra::CTime::getSystemTimeSecond())
+	{
+		logout();
+	}
 }
 
 ISession* ISession::create(int sockfd, struct sockaddr_in* addr, int timeout)

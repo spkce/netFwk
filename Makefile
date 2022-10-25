@@ -5,9 +5,9 @@ CC ?= gcc
 CXX ?= g++
 AR ?= ar
 
-INC := -I Include -I Include/server -I Include/terminal -I Include/protocol -I library/Infra/Include
+INC := -I Include -I Include/server -I Include/terminal -I Include/protocol -I Include/client -I library/Infra/Include
 
-CFLAGS = -L./lib -Wall  -lpthread -lrt -lstdc++ -std=c++11 -ldl -lInfra
+CFLAGS = -L./lib -Wall  -lpthread -lrt -lstdc++ -std=c++11 -ldl -lInfra -g
 
 SRC_DIR += \
 ./		\
@@ -15,6 +15,7 @@ SRC_DIR += \
 ./src/Infra \
 ./src/terminal \
 ./src/protocol \
+./src/client \
 
 DIR_OBJ := ./obj
 TARGET := a.out

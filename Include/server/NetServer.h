@@ -44,7 +44,6 @@ public:
 	**/
 	static INetServer* create(unsigned int port, Type_t type);
 
-	//static INetServer* create(unsigned int port, IProtocol* p);
 	/**
 	* @brief 服务器开始运行
 	* @param maxlisten 最大连接
@@ -56,7 +55,7 @@ public:
 	* @param proc 服务器回调函数
 	* @return 成功/失败
 	**/
-	virtual bool attach(ServerProc_t proc) = 0;
+	virtual bool attach(const ServerProc_t & proc) = 0;
 	/**
 	* @brief 服务器停止运行
 	* @return 成功/失败
