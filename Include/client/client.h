@@ -1,5 +1,7 @@
-#ifndef __NET_CLINET_H__
-#define __NET_CLINET_H__
+#ifndef __CLINET_H__
+#define __CLINET_H__
+#include <stddef.h>
+#include "thread.h"
 
 namespace NetFwk
 {
@@ -72,6 +74,7 @@ public:
 
 };
 
+
 } //NetFwk
 
-#endif //__NET_CLINET_H__
+#endif //__CLINET_H__

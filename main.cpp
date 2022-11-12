@@ -5,7 +5,7 @@
 #include <algorithm>
 #include "Log.h"
 #include "ctime.h"
-#include "NetClient.h"
+#include "client.h"
 #include "NetServer.h"
 #include "Session.h"
 #include "Protocol.h"
