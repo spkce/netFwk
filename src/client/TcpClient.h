@@ -11,19 +11,12 @@ public:
 	CTcpClient();
 	virtual ~CTcpClient();
 
-	virtual bool connect();
-	virtual int send(const char* buf, size_t len);
-	virtual int recv(char* buf, size_t len);
+	virtual bool connect() override;
 
 protected:
-	virtual int inSend(const char* buf, size_t len);
-	virtual int inRecv(char* buf, size_t len);
+	virtual int inSend(const char* buf, size_t len) override;
+	virtual int inRecv(char* buf, size_t len) override;
 
-private:
-	int m_sockfd;
-	size_t m_rLen;
-	bool m_isConnect;
-	char* m_buffer;
 };
 
 } //NetFwk

@@ -42,7 +42,7 @@ $(COBJS): $(DIR_OBJ)/%.o: %.c
 $(CPPOBJS): $(DIR_OBJ)/%.o: %.cpp
 	@echo "CC $(notdir $@)"
 	@mkdir -p $(dir $(@))
-	@$(CC) $(CFLAGS) -o $@ -c $< $(INC)
+	@$(CXX) $(CFLAGS) -o $@ -c $< $(INC)
 
 $(TARGET): submodules $(COBJS) $(CPPOBJS)
 	@$(CC) $(COBJS) $(CPPOBJS) -g -o $@ $(INC) $(CFLAGS) 

@@ -1,7 +1,7 @@
 #include <string.h>
 #include <map>
 #include "thread.h"
-#include "protocol.h"
+#include "Protocol.h"
 
 namespace NetFwk
 {

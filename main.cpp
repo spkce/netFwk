@@ -6,7 +6,7 @@
 #include "Log.h"
 #include "ctime.h"
 #include "client.h"
-#include "NetServer.h"
+#include "TcpServer.h"
 #include "Session.h"
 #include "Protocol.h"
 

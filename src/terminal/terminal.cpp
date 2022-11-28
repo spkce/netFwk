@@ -2,7 +2,7 @@
 #include "ctime.h"
 #include "terminal.h"
 #include "Session.h"
-#include "NetServer.h"
+#include "TcpServer.h"
 
 namespace NetFwk
 {

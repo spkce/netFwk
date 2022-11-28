@@ -1,5 +1,5 @@
-#ifndef __NET_SERVER_H__
-#define __NET_SERVER_H__
+#ifndef __TCP_SERVER_H__
+#define __TCP_SERVER_H__
 
 #include "thread.h"
 #include "terminal.h"
@@ -71,4 +71,4 @@ public:
 };
 
 } //NetFwk
-#endif //__NET_SERVER_H__
+#endif //__TCP_SERVER_H__

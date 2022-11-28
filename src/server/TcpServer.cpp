@@ -5,7 +5,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include "string.h"
-#include "NetServer.h"
+#include "TcpServer.h"
 #include "Log.h"
 
 
@@ -207,4 +207,3 @@ INetServer* INetServer::create(unsigned int port, Type_t type)
 }
 
 } //NetFwk
-

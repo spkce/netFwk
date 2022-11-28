@@ -11,21 +11,11 @@ public:
 	CUdpClient();
 	virtual ~CUdpClient();
 
-	virtual bool connect();
-	virtual int send(const char* buf, size_t len);
-	virtual int recv(char* buf, size_t len);
-	//virtual bool close();
-private:
-	void recv_task(void* arg);
+	virtual bool connect() override;
 
-private:
-	INetClient::recvProc_t m_proc;
-	struct sockaddr_in m_addr;
-	int m_sockfd;
-	size_t m_rLen;
-	bool m_isConnect;
-	char* m_buffer;
-	Infra::CThread* m_pThread; //服务器线程
+protected:
+	virtual int inSend(const char* buf, size_t len) override;
+	virtual int inRecv(char* buf, size_t len) override;
 
 };
 

@@ -11,32 +11,35 @@ namespace NetFwk
 class CNetClient : public INetClient
 {
 
-public:
+protected:
 	CNetClient(Type_t type);
 	virtual ~CNetClient();
 
-	virtual bool init(const char* ip, unsigned int port);
-	virtual bool attach(size_t recvLen, const INetClient::recvProc_t & proc);
-	virtual bool close();
+public:
+	virtual bool init(const char* ip, unsigned int port) override;
+	virtual int send(const char* buf, size_t len) override;
+	virtual int recv(char* buf, size_t len) override;
+	virtual bool attach(size_t recvLen, const INetClient::recvProc_t & proc) override;
+	virtual bool close() override;
 
 protected:
 	virtual int inSend(const char* buf, size_t len) = 0;
 	virtual int inRecv(char* buf, size_t len) = 0;
-	void run();
 	bool isAttach() const;
+	void run();
 
 private:
 	void recv_task(void* arg);
 
 protected:
 	struct sockaddr_in m_addr;
+	int m_sockfd;
+	bool m_isConnect;
 
 private:
 	INetClient::recvProc_t m_proc;
 	Infra::CThread* m_pThread;
-	int m_sockfd;
 	size_t m_rLen;
-	bool m_isConnect;
 	char* m_buffer;
 	const Type_t m_type;
 };
