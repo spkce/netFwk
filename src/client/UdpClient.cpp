@@ -25,6 +25,10 @@ CUdpClient::~CUdpClient()
 bool CUdpClient::connect()
 {
 	m_isConnect = true;
+	if (isAttach())
+	{
+		run();
+	}
 	return true;
 }
 
