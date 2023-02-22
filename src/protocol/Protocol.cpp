@@ -35,7 +35,7 @@ bool IProtocol::start()
 
 int IProtocol::send(const char* buf, int len)
 {
-	if (m_session->getState() == ISession::emStateLogin)
+	if (m_session->getState() < ISession::emStateClose)
 	{
 		return m_session->send(buf, len);
 	}
@@ -64,7 +64,7 @@ bool IProtocol::isLogout() const
 
 void IProtocol::sessionTask(void* arg)
 {
-	if (m_session->getState() < ISession::emStateLogout)
+	if (m_session->getState() < ISession::emStateClose)
 	{
 		memset(m_pBuffer, 0, m_recvLen);
 		int len = m_session->recv(m_pBuffer, m_recvLen);
