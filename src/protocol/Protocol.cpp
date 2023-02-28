@@ -21,7 +21,7 @@ IProtocol::IProtocol(ISession* session, size_t recvLen)
 IProtocol::~IProtocol()
 {
 	m_thread.detachProc(Infra::ThreadProc_t(&IProtocol::sessionTask, this));
-	m_thread.stop();
+	m_thread.stop(true);
 
 	m_session->destroy();
 	delete [] m_pBuffer;
