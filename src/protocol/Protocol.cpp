@@ -20,6 +20,7 @@ IProtocol::IProtocol(ISession* session, size_t recvLen)
 
 IProtocol::~IProtocol()
 {
+	m_session->close();
 	m_thread.detachProc(Infra::ThreadProc_t(&IProtocol::sessionTask, this));
 	m_thread.stop(true);
 
@@ -68,7 +69,7 @@ void IProtocol::sessionTask(void* arg)
 	{
 		memset(m_pBuffer, 0, m_recvLen);
 		int len = m_session->recv(m_pBuffer, m_recvLen);
-		if (len <= 0 )
+		if (len <= 0 || m_session->getState() == ISession::emStateClose)
 		{
 			return;
 		}
