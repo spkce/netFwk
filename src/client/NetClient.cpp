@@ -199,9 +199,8 @@ void CNetClient::recv_task(void* arg)
 	if (rlen > 0)
 	{
 		Infra::Debug("netFwk","recv:%s:%d len=%d\n", (char*)inet_ntoa(m_addr.sin_addr), ntohs(m_addr.sin_port), rlen);
-	}
-
-	m_proc(m_buffer, rlen);
+		m_proc(m_buffer, rlen);
+	}	
 }
 
 INetClient::INetClient()

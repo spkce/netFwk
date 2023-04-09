@@ -59,4 +59,50 @@ int CTcpClient::inRecv(char* buf, size_t len)
 	return ::recv(m_sockfd, buf, len, 0);
 }
 
+/*
+int CTcpClient::inSend(const char* buf, size_t len)
+{
+	const char* p = buf;
+	size_t length = len;
+	while (length > 0)
+	{
+		int n = ::send(m_sockfd, p, length, 0);
+		if (n < 0)
+		{
+			return n;
+		}
+		else if (n == 0)
+		{
+			continue;
+		}
+		p += n;
+		length -= n;
+	}
+	
+	return len;
+}
+
+int CTcpClient::inRecv(char* buf, size_t len)
+{
+	char* p = buf;
+	size_t length = len;
+	while (length > 0)
+	{
+		int n = ::recv(m_sockfd, p, length, 0)
+		if (n < 0)
+		{
+			return n;
+		}
+		else if (n == 0)
+		{
+			return len - length
+		}
+		p += n;
+		length -= n;
+	}
+
+	return len;
+}
+
+*/
 } //NetFwk
