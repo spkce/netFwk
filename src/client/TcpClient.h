@@ -12,6 +12,8 @@ public:
 	virtual ~CTcpClient();
 
 	virtual bool connect() override;
+	virtual int send(const char* buf, size_t len) override;
+	virtual int recv(char* buf, size_t len) override;
 
 protected:
 	virtual int inSend(const char* buf, size_t len) override;

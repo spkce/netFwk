@@ -49,7 +49,7 @@ $(TARGET): submodules $(COBJS) $(CPPOBJS)
 
 
 submodules:
-	@make CC="$(CC)" CXX="$(CXX)" AR="$(AR)" DIR_LIB="$(DIR_LIB)" -C library/Infra
+	@make CC="$(CC)" CXX="$(CXX)" AR="$(AR)" DIR_LIB="$(DIR_LIB)" CFLAGS="-Wall" -C library/Infra
 
 CHECKDIR:
 	@mkdir -p $(DIR_OBJ)

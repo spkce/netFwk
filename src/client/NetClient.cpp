@@ -15,6 +15,7 @@ CNetClient::CNetClient(Type_t type)
 :m_sockfd(-1)
 ,m_isConnect(false)
 ,m_rLen(0)
+,m_buffer(nullptr)
 ,m_type(type)
 {
 	memset(&m_addr, 0, sizeof(struct sockaddr_in));

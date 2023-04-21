@@ -49,6 +49,28 @@ bool CTcpClient::connect()
 	return true;
 }
 
+int CTcpClient::send(const char* buf, size_t len)
+{
+	if (!m_isConnect)
+	{
+		Infra::Error("netFwk", "must be connect first!\n");
+		return -1;
+	}
+
+	return CNetClient::send(buf, len);
+}
+
+int CTcpClient::recv(char* buf, size_t len)
+{
+	if (!m_isConnect)
+	{
+		Infra::Error("netFwk", "must be connect first!\n");
+		return -1;
+	}
+
+	return CNetClient::recv(buf, len);
+}
+
 int CTcpClient::inSend(const char* buf, size_t len)
 {
 	return ::send(m_sockfd, buf, len, 0);
