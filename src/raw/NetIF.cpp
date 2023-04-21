@@ -58,7 +58,7 @@ bool CMac::operator==(const CMac& mac) const
 	return true;
 }
 
-const char* CMac::format(char split)
+const char* CMac::format(char split) const
 {
 	static char _mac[18]; 
 	snprintf(_mac, sizeof(_mac), "%02x%c%02x%c%02x%c%02x%c%02x%c%02x",
@@ -83,6 +83,8 @@ public:
 	bool detach(const CNetCapture::input_t & func);
 	bool start();
 	bool stop();
+
+	void dump() const;
 
 private:
 	void capture(void* arg);
@@ -189,6 +191,15 @@ void CNetInterface::capture(void* arg)
 	}
 }
 
+void CNetInterface::dump() const
+{
+	printf("device index: %d \n", m_index);
+	printf("device mac: %s \n", m_mac.format(':'));
+	printf("device ip: %s \n", (char *)inet_ntoa(m_ip));
+	printf("device netmask: %s \n", (char *)inet_ntoa(m_netmask));
+	printf("device broadcast: %s \n", (char *)inet_ntoa(m_broadcast));
+}
+
 CNetCapture::CNetCapture()
 {
 
@@ -274,6 +285,17 @@ size_t CNetCapture::getNetCardNum() const
 	return m_mapInterface.size();
 }
 
+bool CNetCapture::start(const std::string & name)
+{
+	auto it = m_mapInterface.find(name);
+	if (it == m_mapInterface.end())
+	{
+		return false;
+	}
+
+	CNetInterface* p = it->second;
+	return p->start();
+}
 
 bool CNetCapture::attach(const std::string & name, input_t input)
 {
@@ -299,16 +321,23 @@ bool CNetCapture::detach(const std::string & name, input_t input)
 	return p->detach(input);
 }
 
-void CNetCapture::Dump() const
+bool CNetCapture::stop(const std::string & name)
+{
+	auto it = m_mapInterface.find(name);
+	if (it == m_mapInterface.end())
+	{
+		return false;
+	}
+
+	CNetInterface* p = it->second;
+	return p->stop();
+}
+
+void CNetCapture::dump() const
 {
 	for (auto it : m_mapInterface)
 	{
-		CNetInterface p = it.;
-		
-		printf("device index: %d \n", temp.ifindex);
-		printf("device mac: %s \n", macFormat(temp.mac, ':'));
-		printf("device ip: %s \n", (char *)inet_ntoa(temp.ip));
-		printf("device netmask: %s \n", (char *)inet_ntoa(temp.netmask));
-		printf("device broadcast: %s \n", (char *)inet_ntoa(temp.broadcast));
+		CNetInterface* p = it.second;
+		p->dump();
 	} 
 }

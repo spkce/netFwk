@@ -25,7 +25,7 @@ public:
 	virtual ~CMac();
 	CMac& operator=(const CMac& mac);
 	bool operator==(const CMac& mac) const;
-	const char* format(char split = ':');
+	const char* format(char split = ':') const;
 	unsigned char m_mac[6];
 };
 
@@ -56,9 +56,11 @@ public:
 public:
 	virtual bool init();
 	virtual size_t getNetCardNum() const;
+	virtual bool start(const std::string & name);
 	virtual bool attach(const std::string & name, input_t input);
 	virtual bool detach(const std::string & name, input_t input);
-
+	virtual bool stop(const std::string & name);
+	virtual void dump() const;
 private:
 	std::map<std::string, CNetInterface*> m_mapInterface;
 };
