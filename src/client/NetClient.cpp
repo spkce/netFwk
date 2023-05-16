@@ -29,7 +29,7 @@ CNetClient::~CNetClient()
 	}
 }
 
-bool CNetClient::init(const char* ip, unsigned int port)
+bool CNetClient::init(const char* ip, unsigned int port, int timeout)
 {
 	if (m_sockfd >= 0)
 	{
@@ -42,6 +42,23 @@ bool CNetClient::init(const char* ip, unsigned int port)
 	{
 		Infra::Error("netFwk", "open socket fail!\n");
 		return false;
+	}
+
+	if (timeout > 0)
+	{
+		struct timeval _timeout = {0,0};
+		_timeout.tv_sec = timeout;
+		if (setsockopt(m_sockfd, SOL_SOCKET, SO_RCVTIMEO,(char*)&_timeout,sizeof(struct timeval)) == -1)
+		{
+			Infra::Error("netFwk","setsockopt error : %s\n", strerror(errno));
+			return false;
+		}
+		
+		if (setsockopt(m_sockfd, SOL_SOCKET, SO_SNDTIMEO,(char*)&_timeout,sizeof(struct timeval)) == -1)
+		{
+			Infra::Error("netFwk","setsockopt error : %s\n", strerror(errno));
+			return false;
+		}
 	}
 
 	unsigned int nIpAddr = inet_addr(ip);

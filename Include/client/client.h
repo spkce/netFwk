@@ -34,7 +34,7 @@ public:
 	* @param port 服务器端口
 	* @return 成功：true；失败：false
 	**/
-	virtual bool init(const char* ip, unsigned int port) = 0;
+	virtual bool init(const char* ip, unsigned int port, int timeout = -1) = 0;
 
 	/**
 	* @brief 注册接受回调函数

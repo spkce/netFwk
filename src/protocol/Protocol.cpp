@@ -67,14 +67,20 @@ void IProtocol::sessionTask(void* arg)
 {
 	if (m_session->getState() < ISession::emStateClose)
 	{
-		memset(m_pBuffer, 0, m_recvLen);
-		int len = m_session->recv(m_pBuffer, m_recvLen);
-		if (len <= 0 || m_session->getState() == ISession::emStateClose)
-		{
-			return;
-		}
+		size_t recvLen = m_recvLen;
 
-		parse(m_pBuffer, len);
+		while (recvLen)
+		{
+			recvLen = recvLen > m_recvLen ? m_recvLen : recvLen;
+			memset(m_pBuffer, 0, recvLen);
+			int len = m_session->recv(m_pBuffer, recvLen);
+			if (len <= 0 || m_session->getState() == ISession::emStateClose)
+			{
+				return ;
+			}
+
+			recvLen = (size_t)parse(m_pBuffer, len);
+		}
 	}
 }
 

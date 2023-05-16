@@ -16,7 +16,7 @@ protected:
 	virtual ~CNetClient();
 
 public:
-	virtual bool init(const char* ip, unsigned int port) override;
+	virtual bool init(const char* ip, unsigned int port, int timeout) override;
 	virtual int send(const char* buf, size_t len) override;
 	virtual int recv(char* buf, size_t len) override;
 	virtual bool attach(size_t recvLen, const INetClient::recvProc_t & proc) override;
