@@ -202,7 +202,7 @@ int CSession::send(const char* buf, int len)
 		}
 		else
 		{
-			Infra::Error("netFwk","send err : %s\n", strerror(errno));
+			Infra::Error("netFwk","%s:%d send err : %s\n", (char*)inet_ntoa(m_addr.sin_addr), ntohs(m_addr.sin_port), strerror(errno));
 			if (m_timeout == -1)
 			{
 				//无超时的session，发送失败便登出

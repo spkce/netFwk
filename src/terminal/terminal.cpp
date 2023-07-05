@@ -49,7 +49,7 @@ bool ITerminal::stop()
 {
 	m_thread.stop();
 
-	if (m_pServer->isRun())
+	if (m_pServer != nullptr && m_pServer->isRun())
 	{
 		m_pServer->stop();
 	}
