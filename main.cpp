@@ -5,11 +5,12 @@
 #include <algorithm>
 #include "Log.h"
 #include "ctime.h"
+#include "ByteBuffer.h"
 #include "client.h"
 #include "TcpServer.h"
 #include "Session.h"
 #include "Protocol.h"
-
+#include "ProtoClient.h"
 
 
 class CProtocol : public NetFwk::IProtocol
@@ -80,7 +81,7 @@ int CTermial::getState()
 {
 	return 0;
 }
-
+#if 0
 class CNetClient
 {
 public:
@@ -145,13 +146,52 @@ short checkSum(const unsigned char* buffer, int size)
 	
 	return (unsigned short)(~cksum);
 }
+#endif
+
+
+class CNetClient : public NetFwk::IProtoClient
+{
+public:
+	CNetClient();
+	virtual ~CNetClient();
+
+	bool sendto(int id, const unsigned char* buf, size_t len);
+	virtual int parser(const unsigned char* buf, size_t len, NetFwk::CReqClient * q);
+};
+
+CNetClient::CNetClient()
+:IProtoClient(NetFwk::INetClient::emTCPClient)
+{
+}
+
+CNetClient::~CNetClient()
+{
+	close();
+}
+
+bool CNetClient::sendto(int id, const unsigned char* buf, size_t len)
+{
+	NetFwk::CReqClient req;
+	req.setId(id);
+	return send(buf, len, &req);
+}
+
+int CNetClient::parser(const unsigned char* buf, size_t len, NetFwk::CReqClient * q)
+{
+	q->input(buf, len);
+	return 0;
+}
 
 int main(int argc, char const *argv[])
 {
-	//CTermial termial;
-	//termial.init(8000, 5);
+	CTermial termial;
+	termial.init(8000, 5);
 
 	CNetClient client;
+	client.init("127.0.0.1", 8000, -1);
+
+#if 0
+	//CNetClient client;
 
 	//unsigned char buf[1024] = {0}; 
 	//int i = 10;
@@ -215,6 +255,11 @@ int main(int argc, char const *argv[])
 		
 		while(1);
 //	}
+#endif
 
+	termial.stop(); //没有stop会有空纯虚函数被调用
+	//client.close();
+	//while(1);
+	
 	return 0;
 }
