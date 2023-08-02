@@ -52,7 +52,7 @@ bool IProtoClient::close()
 	m_rwlock.wLock();
 	for (auto it = m_mapRequest.begin(); it != m_mapRequest.end(); it++)
 	{
-		CReqClient* p = it->second;
+		CResClient* p = it->second;
 		p->setId(0);
 	}
 
@@ -62,31 +62,34 @@ bool IProtoClient::close()
 	return true;
 }
 
-bool IProtoClient::send(const unsigned char* buf, size_t len, CReqClient * req)
+bool IProtoClient::send(const unsigned char* buf, size_t len, CResClient * req)
 {
 	if (m_client)
 	{
 		return false;
 	}
 
-	if ((int)len != m_client->send((const char*)buf, len))
+	if (m_client->send((const char*)buf, len) != 0)
 	{
 		return false;
 	}
 	
-	if (!req)
+	if (!req || req->id() == 0)
 	{
 		return true;
 	}
 
-	appendResopne(req);
+	if (appendResopne(req))
+	{
+		return false;
+	}
 
 	if (m_timeout >= 0)
 	{
-		unsigned long long ctime = Infra::CTime::getProcessTimeSecond();
+		unsigned long long ctime = Infra::CTime::getSystemTimeSecond();
 		unsigned long long etime = ctime + m_timeout;
 		
-		while (ctime > etime)
+		while (ctime < etime)
 		{
 			if (!req->id())
 			{
@@ -100,7 +103,7 @@ bool IProtoClient::send(const unsigned char* buf, size_t len, CReqClient * req)
 			}
 			
 			Infra::CTime::delay_ms(300);
-			ctime = Infra::CTime::getProcessTimeSecond();
+			ctime = Infra::CTime::getSystemTimeSecond();
 		}
 		
 		deleteResopne(req);
@@ -127,7 +130,7 @@ bool IProtoClient::send(const unsigned char* buf, size_t len, CReqClient * req)
 	}
 }
 
-bool IProtoClient::dispense(CReqClient* p)
+bool IProtoClient::dispense(CResClient* p)
 {
 	int id = p->id();
 	m_rwlock.rLock();
@@ -137,14 +140,14 @@ bool IProtoClient::dispense(CReqClient* p)
 		m_rwlock.unLock();
 		return false;
 	}
-	CReqClient * payload = it->second;
+	CResClient * payload = it->second;
 	m_rwlock.unLock();
 
 	*payload = std::move(*p);
-	return false;
+	return true;
 }
 
-bool IProtoClient::appendResopne(CReqClient* p)
+bool IProtoClient::appendResopne(CResClient* p)
 {
 	int id = p->id();
 	m_rwlock.wLock();
@@ -159,12 +162,12 @@ bool IProtoClient::appendResopne(CReqClient* p)
 	return true;
 }
 
-bool IProtoClient::deleteResopne(CReqClient* p)
+bool IProtoClient::deleteResopne(CResClient* p)
 {
 	int id = p->id();
 	m_rwlock.wLock();
 	auto it = m_mapRequest.find(id);
-	if ( it != m_mapRequest.end())
+	if ( it == m_mapRequest.end())
 	{
 		m_rwlock.unLock();
 		return false;
@@ -176,10 +179,18 @@ bool IProtoClient::deleteResopne(CReqClient* p)
 
 void IProtoClient::recv_proc(const char* buf, size_t len)
 {
-	CReqClient req;
-	if (parser((const unsigned char*)buf, len, &req))
+	std::list<CResClient> list;
+	if (parser((const unsigned char*)buf, len, list) == 0)
 	{
-		dispense(&req);
+		for (auto it = list.begin(); it !=list.end(); it++)
+		{
+			if (it->id() > 0)
+			{
+				CResClient & res = *it;
+				dispense(&res);
+			}
+		} 
+		
 	}
 }
 

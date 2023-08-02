@@ -137,15 +137,9 @@ int CNetClient::recv(char* buf, size_t len)
 
 bool CNetClient::attach(size_t recvLen, const INetClient::recvProc_t & proc)
 {
-	if (m_sockfd < 0)
+	if (m_sockfd >= 0 || m_isConnect)
 	{
-		Infra::Error("netFwk", "client is not init!\n");
-		return false;
-	}
-
-	if (m_isConnect)
-	{
-		Infra::Warning("netFwk", "client is already connect!\n");
+		Infra::Warning("netFwk", "client is already start!\n");
 		return false;
 	}
 

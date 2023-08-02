@@ -1,11 +1,13 @@
 #ifndef __PROTO_CLIENT_H__
 #define __PROTO_CLIENT_H__
 
+#include <list>
 #include <map>
 #include "thread.h"
 #include "ctime.h"
 #include "client.h"
-#include "ReqClient.h"
+#include "ResClient.h"
+
 namespace NetFwk
 {
 
@@ -19,14 +21,14 @@ protected:
 public:
 	virtual bool init(const char* ip, unsigned int port, int timeout = -1);
 	virtual bool close();
-	virtual int parser(const unsigned char* buf, size_t len, CReqClient * req) = 0;
+	virtual int parser(const unsigned char* buf, size_t len, std::list<CResClient> & list) = 0;
 	
-	virtual bool send(const unsigned char* buf, size_t len, CReqClient * req = nullptr);
-	virtual bool dispense(CReqClient* p);
+	virtual bool send(const unsigned char* buf, size_t len, CResClient * req = nullptr);
 
 private:
-	bool appendResopne(CReqClient* p);
-	bool deleteResopne(CReqClient* p);
+	bool dispense(CResClient* p);
+	bool appendResopne(CResClient* p);
+	bool deleteResopne(CResClient* p);
 	void recv_proc(const char* buf, size_t len);
 
 private:
@@ -34,7 +36,7 @@ private:
 	const INetClient::Type_t m_type;
 	NetFwk::INetClient* m_client;
 	Infra::CRwlock m_rwlock;
-	std::map<int, CReqClient*> m_mapRequest;
+	std::map<int, CResClient*> m_mapRequest;
 };
 
 

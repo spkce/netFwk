@@ -8,19 +8,21 @@ namespace NetFwk
 
 //template<>
 
-class CReqClient
+class CResClient
 {
 public:
-	CReqClient();
-	virtual ~CReqClient();
-
+	CResClient();
+	CResClient(CResClient && o);
+	CResClient(int id, Infra::CByteBuffer && buffer);
+	virtual ~CResClient();
+	
 	int id() const;
 	void setId(int id);
 	size_t size();
 	bool input(const unsigned char* buf, size_t len);
 	const unsigned char* get();
 	
-	CReqClient& operator=(CReqClient && req);
+	CResClient& operator=(CResClient && req);
 
 private:
 	Infra::CMutex m_mutex;

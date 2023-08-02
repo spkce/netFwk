@@ -156,7 +156,7 @@ public:
 	virtual ~CNetClient();
 
 	bool sendto(int id, const unsigned char* buf, size_t len);
-	virtual int parser(const unsigned char* buf, size_t len, NetFwk::CReqClient * q);
+	virtual int parser(const unsigned char* buf, size_t len, NetFwk::CResClient * q);
 };
 
 CNetClient::CNetClient()
@@ -171,12 +171,12 @@ CNetClient::~CNetClient()
 
 bool CNetClient::sendto(int id, const unsigned char* buf, size_t len)
 {
-	NetFwk::CReqClient req;
+	NetFwk::CResClient req;
 	req.setId(id);
 	return send(buf, len, &req);
 }
 
-int CNetClient::parser(const unsigned char* buf, size_t len, NetFwk::CReqClient * q)
+int CNetClient::parser(const unsigned char* buf, size_t len, NetFwk::CResClient * q)
 {
 	q->input(buf, len);
 	return 0;
