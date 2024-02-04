@@ -72,7 +72,7 @@ bool ITerminal::serverTask(int sockfd, struct sockaddr_in* addr)
 		Infra::Warning("netFwk", "the number of session reaches its maximun !\n");
 		return false;
 	}
-
+	printf("\033[0;35m""%s:%d %s""\033[0m\n", __FILE__, __LINE__, __func__);
 	ISession* pSession = ISession::create(sockfd, addr, m_timeout);
 	if (pSession == nullptr)
 	{
@@ -95,12 +95,14 @@ bool ITerminal::serverTask(int sockfd, struct sockaddr_in* addr)
 
 void ITerminal::managerTask(void* arg)
 {
+	//printf("\033[0;35m""%s:%d %s""\033[0m\n", __FILE__, __LINE__, __func__);
 	m_mutex.lock();
 	for (auto it = m_listProtocol.begin(); it != m_listProtocol.end();)
 	{
 		IProtocol* p = *it;
-		if (p->isLogout())
+		if (p->isInvalid())
 		{
+			printf("\033[0;35m""%s:%d %s""\033[0m\n", __FILE__, __LINE__, __func__);
 			m_listProtocol.erase(it++);
 			delete p;
 		}

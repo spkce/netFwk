@@ -156,7 +156,7 @@ public:
 	virtual ~CNetClient();
 
 	bool sendto(int id, const unsigned char* buf, size_t len);
-	virtual int parser(const unsigned char* buf, size_t len, NetFwk::CResClient * q);
+	virtual int parser(const unsigned char* buf, size_t len, std::list<NetFwk::CResClient> & list);
 };
 
 CNetClient::CNetClient()
@@ -172,23 +172,28 @@ CNetClient::~CNetClient()
 bool CNetClient::sendto(int id, const unsigned char* buf, size_t len)
 {
 	NetFwk::CResClient req;
-	req.setId(id);
+	req.setId(0);
 	return send(buf, len, &req);
 }
 
-int CNetClient::parser(const unsigned char* buf, size_t len, NetFwk::CResClient * q)
+int CNetClient::parser(const unsigned char* buf, size_t len,std::list<NetFwk::CResClient> & list)
 {
-	q->input(buf, len);
+	//NetFwk::CResClient q;
+	//q->input(buf, len);
+	Infra::CByteBuffer buffer;
+	buffer.append(buf, len);
+	list.push_back(NetFwk::CResClient(0, std::move(buffer)));
 	return 0;
 }
 
+Infra::CCondSignal g_cond;
 int main(int argc, char const *argv[])
 {
 	CTermial termial;
-	termial.init(8000, 5);
-
-	CNetClient client;
-	client.init("127.0.0.1", 8000, -1);
+	termial.init(8000, -1);
+	g_cond.wait();
+	//CNetClient client;
+	//client.init("127.0.0.1", 8000, -1);
 
 #if 0
 	//CNetClient client;

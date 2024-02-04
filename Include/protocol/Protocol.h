@@ -68,7 +68,7 @@ protected:
 	virtual bool keepAlive();
 
 private:
-	bool isLogout() const;
+	bool isInvalid() const;
 	void sessionTask(void* arg);
 
 protected:

@@ -20,6 +20,7 @@ IProtocol::IProtocol(ISession* session, size_t recvLen)
 
 IProtocol::~IProtocol()
 {
+	printf("\033[0;35m""%s:%d %s""\033[0m\n", __FILE__, __LINE__, __func__);
 	m_session->close();
 	m_thread.detachProc(Infra::ThreadProc_t(&IProtocol::sessionTask, this));
 	m_thread.stop(true);
@@ -58,9 +59,10 @@ bool IProtocol::keepAlive()
 	return m_session->keepAlive();
 }
 
-bool IProtocol::isLogout() const
+bool IProtocol::isInvalid() const
 {
-	return m_session->getState() == ISession::emStateLogout;
+	const ISession::state_t state = m_session->getState();
+	return state == ISession::emStateClose || state == ISession::emStateLogout;
 }
 
 void IProtocol::sessionTask(void* arg)
@@ -74,11 +76,15 @@ void IProtocol::sessionTask(void* arg)
 			recvLen = recvLen > m_recvLen ? m_recvLen : recvLen;
 			memset(m_pBuffer, 0, recvLen);
 			int len = m_session->recv(m_pBuffer, recvLen);
-			if (len <= 0 || m_session->getState() == ISession::emStateClose)
+			if (len < 0 || m_session->getState() == ISession::emStateClose)
 			{
 				return ;
 			}
-
+			else if (len == 0)
+			{
+				m_session->close();
+				return ;
+			}
 			recvLen = (size_t)parse(m_pBuffer, len);
 		}
 	}

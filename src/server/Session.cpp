@@ -96,6 +96,7 @@ void CSession::set(int sockfd, struct sockaddr_in* addr, int timeout)
 		m_timer.run();
 	}
 
+	m_lastTime = Infra::CTime::getSystemTimeSecond();
 }
 
 bool CSession::login()
@@ -236,7 +237,14 @@ void CSession::timerProc(unsigned long long arg)
 {
 	if ((m_lastTime + m_timeout) <= Infra::CTime::getSystemTimeSecond())
 	{
-		logout();
+		if (m_state != emStateCreated)
+		{
+			logout();
+		}
+		else
+		{
+			close();
+		}
 	}
 }
 
